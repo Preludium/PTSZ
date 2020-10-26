@@ -64,16 +64,14 @@ void scheduleInstance(string index, int instanceSize) {
 
     int processedTime = 0, criterionBeforeBigBrainAlgorithm = 0;
     for (auto task: tasks) {
-        if (processedTime < tasks.at(task.index - 1).readinessTime)
-            processedTime += tasks.at(task.index - 1).readinessTime - processedTime;
+        if (processedTime < task.readinessTime)
+            processedTime += task.readinessTime - processedTime;
 
-        processedTime += tasks.at(task.index - 1).processingDuration;
-        criterionBeforeBigBrainAlgorithm += tasks.at(task.index - 1).getCriterion(processedTime);
+        processedTime += task.processingDuration;
+        criterionBeforeBigBrainAlgorithm += task.getCriterion(processedTime);
     }
 
     int currentTime = 0,
-        resultTime = tasks.at(0).deadlineTime,
-        resultCriterion = tasks.at(0).getCriterion(tasks.at(0).processingDuration),
         currentCriterion,
         testCriterion;
 
@@ -88,6 +86,7 @@ void scheduleInstance(string index, int instanceSize) {
                 currentCriterion += tasksCopy.at(j).getCriterion(currentTime);
                 continue;
             }
+
             testCriterion = currentCriterion;
 
             currentCriterion += tasksCopy.at(j).getCriterion(currentTime + tasksCopy.at(j).processingDuration); // kryterium przed swapem
@@ -97,7 +96,6 @@ void scheduleInstance(string index, int instanceSize) {
             testCriterion += tasksCopy.at(j).getCriterion(currentTime);
             if (currentCriterion >= testCriterion) { // jesli poprawione zostalo kryterium
                 currentCriterion = testCriterion;
-                continue;
             } else {    // jak jednak dupa to trzeba odczarowac aktualny czas
                 currentTime -= tasksCopy.at(j).processingDuration;
                 currentTime += tasksCopy.at(i).processingDuration;
@@ -105,15 +103,23 @@ void scheduleInstance(string index, int instanceSize) {
             }
         }
         tasks = tasksCopy;
-        resultTime = currentTime;
-        resultCriterion = currentCriterion;
     }
 
-    if (criterionBeforeBigBrainAlgorithm < resultCriterion) { // zabezpieczenie przed chujowym algorytmem
-        cout << "#Zjebales => before: " << criterionBeforeBigBrainAlgorithm << ", after: " << resultCriterion << endl;
+    processedTime = 0;
+    int criterionAfterBigBrainAlgorithm = 0;
+    for (auto task: tasks) {
+        if (processedTime < task.readinessTime)
+            processedTime += task.readinessTime - processedTime;
+
+        processedTime += task.processingDuration;
+        criterionAfterBigBrainAlgorithm += task.getCriterion(processedTime);
     }
 
-    outputFile << currentCriterion << endl;
+    if (criterionBeforeBigBrainAlgorithm < criterionAfterBigBrainAlgorithm) { // zabezpieczenie przed chujowym algorytmem
+        cout << "#Zjebales => before: " << criterionBeforeBigBrainAlgorithm << ", after: " << criterionAfterBigBrainAlgorithm << endl;
+    }
+
+    outputFile << criterionAfterBigBrainAlgorithm << endl;
     for (auto task: tasks) {
         outputFile << task.index << " ";
         // cout << task.index << endl;
@@ -131,7 +137,7 @@ int main(int argc, char *argv[]) {
         index = argv[1];
     }
 
-    for (int i = 50; i <= 500; i += 50) {
+    for (int i = 50; i <= 50; i += 50) {
         scheduleInstance(index, i);
     }    
 
