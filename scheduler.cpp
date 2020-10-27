@@ -1,9 +1,8 @@
 #include <iostream>
-#include <stdlib.h>
 #include <fstream>
+#include <ctime>
 #include <string>
 #include <vector>
-#include <sstream>
 #include <iterator>
 #include <algorithm>
 using namespace std;
@@ -41,8 +40,9 @@ void scheduleInstance(string index, int instanceSize) {
     string inputFilePrefix("in_"), outputFilePrefix("out_"), base(".txt");
     ifstream instanceFile(inputFilePrefix + index + "_" + to_string(instanceSize) + base);
     ofstream outputFile(outputFilePrefix + index + "_" + to_string(instanceSize) + base);
+    clock_t start, end;
     int n;
-    
+
     vector<Task> tasks, tasksCopy;
     Task task = Task();
     
@@ -62,67 +62,67 @@ void scheduleInstance(string index, int instanceSize) {
 
     sortByDeadline(tasks);
 
-    int processedTime = 0, criterionBeforeBigBrainAlgorithm = 0;
-    for (auto task: tasks) {
-        if (processedTime < task.readinessTime)
-            processedTime += task.readinessTime - processedTime;
+    int resultCriterion = 0, resultTime = 0;
+    start = clock();
+    for (int i = 0; i < n; ++i) {
+        int currentTime = resultTime,
+            currentCriterion = resultCriterion;
 
-        processedTime += task.processingDuration;
-        criterionBeforeBigBrainAlgorithm += task.getCriterion(processedTime);
-    }
+        for (int j = i + 1; j < n; ++j) {
+            Task rootTask = tasks[i],
+                currentTask = tasks[j];
 
-    int currentTime = 0,
-        currentCriterion,
-        testCriterion;
-
-    tasksCopy = tasks;
-    for (int i = 1; i < n; ++i) {
-        currentCriterion = 0;
-        currentTime = 0;
-
-        for (int j = 0; j < i; ++j) {
-            if (tasksCopy.at(i).readinessTime > currentTime) { // jesli i-ty nie jest jeszcze gotowy to nie ma swapa i lecimy dali wuja 
-                currentTime += tasksCopy.at(j).processingDuration;
-                currentCriterion += tasksCopy.at(j).getCriterion(currentTime);
+            if (currentTask.readinessTime > currentTime) {
                 continue;
             }
 
-            testCriterion = currentCriterion;
+            // before swap
+            int beforeSwapTime = currentTime;
+            int beforeSwapCriterion = currentCriterion;
+            if (rootTask.readinessTime > beforeSwapTime) {
+                beforeSwapTime = rootTask.readinessTime; 
+            }
+            beforeSwapTime += rootTask.processingDuration;
+            beforeSwapCriterion += rootTask.getCriterion(beforeSwapTime);
 
-            currentCriterion += tasksCopy.at(j).getCriterion(currentTime + tasksCopy.at(j).processingDuration); // kryterium przed swapem
-            swap(tasksCopy, j, i);
-            
-            currentTime += tasksCopy.at(j).processingDuration;
-            testCriterion += tasksCopy.at(j).getCriterion(currentTime);
-            if (currentCriterion >= testCriterion) { // jesli poprawione zostalo kryterium
-                currentCriterion = testCriterion;
-            } else {    // jak jednak dupa to trzeba odczarowac aktualny czas
-                currentTime -= tasksCopy.at(j).processingDuration;
-                currentTime += tasksCopy.at(i).processingDuration;
-                swap(tasksCopy, j, i);
+            if (currentTask.readinessTime > beforeSwapTime) {
+                beforeSwapTime = currentTask.readinessTime; 
+            }
+            beforeSwapTime += currentTask.processingDuration;
+            beforeSwapCriterion += currentTask.getCriterion(beforeSwapTime);
+
+            // after swap
+            int afterSwapTime = currentTime;
+            int afterSwapCriterion = currentCriterion;
+            if (currentTask.readinessTime > afterSwapTime) {
+                afterSwapTime = currentTask.readinessTime; 
+            }
+            afterSwapTime += currentTask.processingDuration;
+            afterSwapCriterion += currentTask.getCriterion(afterSwapTime);
+
+            if (rootTask.readinessTime > afterSwapTime) {
+                afterSwapTime = rootTask.readinessTime; 
+            }
+            afterSwapTime += rootTask.processingDuration;
+            afterSwapCriterion += rootTask.getCriterion(afterSwapTime);
+
+            if (afterSwapCriterion < beforeSwapCriterion) {
+                swap(tasks, i, j);
             }
         }
-        tasks = tasksCopy;
+
+        if (tasks[i].readinessTime > resultTime) {
+            resultTime = tasks[i].readinessTime; 
+        }
+        resultTime += tasks[i].processingDuration;
+        resultCriterion += tasks[i].getCriterion(resultTime);
     }
+    end = clock();
+    cout << index << " " << instanceSize << ": " << resultCriterion << " | " << double(end - start) << " ms" << endl;
 
-    processedTime = 0;
-    int criterionAfterBigBrainAlgorithm = 0;
-    for (auto task: tasks) {
-        if (processedTime < task.readinessTime)
-            processedTime += task.readinessTime - processedTime;
-
-        processedTime += task.processingDuration;
-        criterionAfterBigBrainAlgorithm += task.getCriterion(processedTime);
-    }
-
-    if (criterionBeforeBigBrainAlgorithm < criterionAfterBigBrainAlgorithm) { // zabezpieczenie przed chujowym algorytmem
-        cout << "#Zjebales => before: " << criterionBeforeBigBrainAlgorithm << ", after: " << criterionAfterBigBrainAlgorithm << endl;
-    }
-
-    outputFile << criterionAfterBigBrainAlgorithm << endl;
+    outputFile << resultCriterion << endl;
     for (auto task: tasks) {
         outputFile << task.index << " ";
-        // cout << task.index << endl;
     }
 }
     
@@ -137,7 +137,7 @@ int main(int argc, char *argv[]) {
         index = argv[1];
     }
 
-    for (int i = 50; i <= 50; i += 50) {
+    for (int i = 50; i <= 500; i += 50) {
         scheduleInstance(index, i);
     }    
 
