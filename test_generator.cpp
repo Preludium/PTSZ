@@ -1,10 +1,6 @@
 #include <iostream>
-#include <stdlib.h>
 #include <fstream>
 #include <string>
-#include <vector>
-#include <sstream>
-#include <iterator>
 using namespace std;
 
 int main(int argc, char *argv[]) {
@@ -22,8 +18,17 @@ int main(int argc, char *argv[]) {
         ofstream outFile(outFileName + index + "_" + to_string(i) + base);
         outFile << 0 << endl;
         outFile << 1;
+        int counter = 1, machine = 1;
+
         for (int j = 2; j <= i; ++j) {
-            outFile << " " << j; 
+            if (machine == 5 || counter < i / 5) {
+                outFile << " " << j; 
+                counter++;
+            } else {
+                outFile << endl << j;
+                counter = 1;
+                machine++;
+            }
         }
         outFile.close();
     }

@@ -1,5 +1,2 @@
-.vscode
-.vs
-*.json
 *
-*.pdf
+!*.cpp

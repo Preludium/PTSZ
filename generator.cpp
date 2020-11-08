@@ -1,33 +1,50 @@
 #include <iostream>
-#include <stdlib.h>
+#include <ctime>
+#include <cstdlib>
 #include <fstream>
 #include <string>
+#include <algorithm>
+#include <vector>
 using namespace std;
 
+int MAX_NUM = 15;
+
 int main(int argc, char *argv[]) {
-    int p, r, d, w, max_range;
-    string base(".txt"), outFileName("in_136814_");
     srand(time(NULL));
-    
-    if (argc == 1) {
-        cout << "Enter max range: ";
-        cin >> max_range;
+    string base(".txt"), inFileName("in_"), index;
+
+    if (argc < 2) {
+        cout << "Enter index: ";
+        cin >> index;
     } else {
-        max_range = atoi(argv[1]);
+        index = argv[1];
     }
 
-    for (int i = 50; i < 501; i += 50) {
-        ofstream outFile(outFileName + to_string(i) + base);
+    vector<double> machines;
+    machines.push_back(1);
+
+    for (int i = 50; i <= 500; i += 50) {
+        ofstream outFile(inFileName + index + "_" + to_string(i) + base);
         outFile << i << endl;
-        for (int j = 0; j < i; ++j) {
-            p = rand() % max_range + 1;
-            r = rand() % i + 1;
-            d = rand() % max_range + p + r + 1;
-            w = rand() % max_range + 1;
-            outFile << p << " " << r << " " << d << " " << w << endl;
-        }    
+
+        for (int j = 1; j < 5; ++j) {
+            machines.push_back((rand() % 399 + 101) / 100.0);
+        }
+
+        random_shuffle(machines.begin(), machines.end());
+
+        outFile << machines[0];
+        for (int j = 1; j < 5; ++j) {
+            outFile << " " << machines[j];
+        }
+
+        outFile << endl;
+
+        for (int j = 0; j < i; j++) {
+            outFile << rand() % MAX_NUM + 1 << " " << rand() % (i + 1) << endl;
+        }
+
         outFile.close();
     }
-
     return 0;
 }
