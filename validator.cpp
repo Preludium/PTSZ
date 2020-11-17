@@ -15,11 +15,12 @@ struct Task {
 struct Machine {
     double factor;
     vector<int> tasks;
-
-    // Machine(double factor) {
-    //     this->factor = factor;
-    // }
 };
+
+double round(double value) {
+    double result = (int)(value * 100 + .5); 
+    return (double)result / 100; 
+}
 
 int main(int argc, char *argv[]) {
     string base(".txt"), inFileName("in_"), outFileName("out_"), index;
@@ -32,8 +33,28 @@ int main(int argc, char *argv[]) {
     }
 
     for (int i = 50; i <= 500; i += 50) {
-        ifstream outFile(outFileName + index + "_" + to_string(i) + base),
-                 inFile(inFileName + index + "_" + to_string(i) + base);
+        // Generator
+        ofstream outGenFile(".\\instances\\in_" + index + "\\"+ outFileName + index + "_" + to_string(i) + base);
+        outGenFile << 0 << endl;
+        outGenFile << 1;
+        int counter = 1, machine = 1;
+
+        for (int j = 2; j <= i; ++j) {
+            if (machine == 5 || counter < i / 5) {
+                outGenFile << " " << j; 
+                counter++;
+            } else {
+                outGenFile << endl << j;
+                counter = 1;
+                machine++;
+            }
+        }
+        outGenFile.close();
+
+        // Validator
+
+        ifstream outFile(".\\instances\\in_" + index + "\\" + outFileName + index + "_" + to_string(i) + base),
+                 inFile(".\\instances\\in_" + index + "\\" + inFileName + index + "_" + to_string(i) + base);
 
         int n;
         string token;
@@ -64,22 +85,22 @@ int main(int argc, char *argv[]) {
             machineCounter++;
         }
 
-        int resultCriterion = 0, localCriterion, time;
+        double resultCriterion = 0, localCriterion, time;
         for (auto machine: machines) {
             time = 0;
             localCriterion = 0;
             for (auto task: machine.tasks) {
                 if (tasks[task - 1].readinessTime > time) time = tasks[task - 1].readinessTime;
 
-                time += tasks[task - 1].processingTime;
+                time += tasks[task - 1].processingTime * machine.factor;
                 localCriterion += time - tasks[task - 1].readinessTime;
             }
-            resultCriterion += localCriterion * machine.factor;
+            resultCriterion += localCriterion;
         }
 
         resultCriterion /= double(i);
 
-        cout << "Received criterion: " << receivedCriterion << ", calculated criterion: " << resultCriterion << endl;
+        cout << "Received criterion: " << receivedCriterion << ", calculated criterion: " << round(resultCriterion) << endl;
 
         // cout << "tasks" << endl;
         // for(auto task : tasks) {
@@ -94,7 +115,6 @@ int main(int argc, char *argv[]) {
         //     }
         //     cout << endl;
         // }
-
 
         inFile.close();
         outFile.close();
