@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
     }
 
     vector<double> machines;
-    machines.push_back(1);
+    machines.push_back(1;
 
     for (int i = 50; i <= 500; i += 50) {
         ofstream outFile(inFileName + index + "_" + to_string(i) + base);

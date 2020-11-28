@@ -34,22 +34,22 @@ int main(int argc, char *argv[]) {
 
     for (int i = 50; i <= 500; i += 50) {
         // Generator
-        ofstream outGenFile(".\\instances\\in_" + index + "\\"+ outFileName + index + "_" + to_string(i) + base);
-        outGenFile << 0 << endl;
-        outGenFile << 1;
-        int counter = 1, machine = 1;
+        // ofstream outGenFile(".\\instances\\in_" + index + "\\"+ outFileName + index + "_" + to_string(i) + base);
+        // outGenFile << 0 << endl;
+        // outGenFile << 1;
+        // int counter = 1, machine = 1;
 
-        for (int j = 2; j <= i; ++j) {
-            if (machine == 5 || counter < i / 5) {
-                outGenFile << " " << j; 
-                counter++;
-            } else {
-                outGenFile << endl << j;
-                counter = 1;
-                machine++;
-            }
-        }
-        outGenFile.close();
+        // for (int j = 2; j <= i; ++j) {
+        //     if (machine == 5 || counter < i / 5) {
+        //         outGenFile << " " << j; 
+        //         counter++;
+        //     } else {
+        //         outGenFile << endl << j;
+        //         counter = 1;
+        //         machine++;
+        //     }
+        // }
+        // outGenFile.close();
 
         // Validator
 
@@ -72,11 +72,11 @@ int main(int argc, char *argv[]) {
         tasks.push_back(task);
 
 
-        int receivedCriterion;
+        double receivedCriterion;
         string tmpLine, tmpCrit;
         int machineCounter = 0;
         getline(outFile, tmpCrit);
-        receivedCriterion = stoi(tmpCrit);
+        receivedCriterion = stod(tmpCrit);
         while (getline(outFile, tmpLine)) {
             stringstream line(tmpLine);
             while (getline(line, token, ' ')) {
@@ -87,9 +87,11 @@ int main(int argc, char *argv[]) {
 
         double resultCriterion = 0, localCriterion, time;
         for (auto machine: machines) {
+            // cout << "MASZYNA: " << machine.factor << endl << endl;
             time = 0;
             localCriterion = 0;
             for (auto task: machine.tasks) {
+                // cout << "TASK: (" + to_string(tasks[task - 1].processingTime) + ", " + to_string(tasks[task - 1].readinessTime) + ")" << endl;
                 if (tasks[task - 1].readinessTime > time) time = tasks[task - 1].readinessTime;
 
                 time += tasks[task - 1].processingTime * machine.factor;
@@ -121,3 +123,5 @@ int main(int argc, char *argv[]) {
     }
     return 0;
 }
+
+// 132337 blad nie ma nic po przecinku
