@@ -35,6 +35,8 @@ struct Machine {
 //GLOBALS
 vector<Task> tasks;
 vector<Machine> machines;
+int medTaskDuration;
+// double avgTaskDuration;
 
 double round(double value) {
     double result = (int)(value * 100 + .5); 
@@ -63,6 +65,20 @@ void readFiles(string index, int i) {
     inFile.close();
 }
 
+void calculateMedian() {
+    // avgTaskDuration = accumulate (tasks.begin(), tasks.end(), 0, 
+    //     [](int i, const Task& o){ return o.processingTime + i; }) / double(tasks.size());
+
+    vector<Task> tasksCopy = tasks;
+    sort(tasksCopy.begin(), tasksCopy.end(), [](const Task& lhs, const Task& rhs) {
+        return lhs.processingTime < rhs.processingTime;
+    });
+
+    medTaskDuration = tasksCopy[tasksCopy.size() / 2 - 1].processingTime;
+
+    // cout << "MEDIAN: " << medTaskDuration << endl << "MEAN: " << avgTaskDuration << endl << endl;
+}
+
 bool selectMachine(Machine a, Machine b, Task task) {
     double aTime = a.time, aCriterion = a.criterion, bTime = b.time, bCriterion = b.criterion;
 
@@ -75,9 +91,13 @@ bool selectMachine(Machine a, Machine b, Task task) {
     aCriterion += aTime - task.readinessTime;
     bCriterion += bTime - task.readinessTime;
 
-    return (aCriterion < bCriterion && aTime < bTime)
-        || (aCriterion < bCriterion)
-        || (aTime < bTime);
+    if (task.processingTime >= medTaskDuration - 2) {
+        return (aCriterion < bCriterion)
+            && (aTime < bTime);
+    } else {
+        return (aCriterion < bCriterion)
+            || (aTime < bTime);
+    }
 }
 
 int getMinMachineIndex(Task task) {
@@ -89,6 +109,8 @@ int getMinMachineIndex(Task task) {
 }
 
 void schedule() {
+    calculateMedian();
+
     // Sort tasks by processsing time and readiness
     sort(tasks.begin(), tasks.end(), [](const Task& lhs, const Task& rhs) {
         return lhs.readinessTime == rhs.readinessTime
@@ -156,7 +178,10 @@ int main(int argc, char *argv[]) {
     // }
     for (string index : indexes) {
         allResults << endl << endl << index << endl;
+        // cout << index << endl;
         for (int i = 50; i <= 500; i += 50) {
+            // cout << i << endl;
+
             machines.clear();
             tasks.clear();
             machines.resize(5);
