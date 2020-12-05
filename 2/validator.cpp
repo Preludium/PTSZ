@@ -24,14 +24,15 @@ double round(double value) {
 
 int main(int argc, char *argv[]) {
     string base(".txt"), inFileName("in_"), outFileName("out_"), index;
-
-    if (argc < 2) {
-        cout << "Enter index: ";
-        cin >> index;
-    } else {
-        index = argv[1];
-    }
-
+    string indexes[] = {"136814"};//{"136774", "136785", "136812", "136815", "132336", "136803", "132639", "136814", "136807", "136798", "132337", "132321", "136808", "136691"};
+    // if (argc < 2) {
+    //     cout << "Enter index: ";
+    //     cin >> index;
+    // } else {
+    //     index = argv[1];
+    // }
+for (string index : indexes) {
+    cout <<endl<<endl<< index << endl;
     for (int i = 50; i <= 500; i += 50) {
         // Generator
         // ofstream outGenFile(".\\instances\\in_" + index + "\\"+ outFileName + index + "_" + to_string(i) + base);
@@ -101,7 +102,11 @@ int main(int argc, char *argv[]) {
         }
 
         resultCriterion /= double(i);
+        resultCriterion = round(resultCriterion);
 
+        if (resultCriterion != receivedCriterion) {
+            cout << i << ": (" << resultCriterion << ", " << receivedCriterion << ")"<<endl;
+        }
         cout << "Received criterion: " << receivedCriterion << ", calculated criterion: " << round(resultCriterion) << endl;
 
         // cout << "tasks" << endl;
@@ -121,6 +126,7 @@ int main(int argc, char *argv[]) {
         inFile.close();
         outFile.close();
     }
+}
     return 0;
 }
 
