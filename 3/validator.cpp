@@ -14,8 +14,6 @@ struct Task {
     vector<int> processingDurations;
 };
 
-struct TaskMachine{};
-
 struct Result {
     double criterion;
     vector<int> jobs;
@@ -23,6 +21,11 @@ struct Result {
 
 vector<Task> tasks;
 Result result;
+
+double round(double value) {
+    double result = (int)(value * 100 + .5); 
+    return (double)result / 100; 
+}
 
 void readInstance(string index, int size) {
     ifstream instanceFile(PATH + index + INPUT_PREFIX + index + "_" + to_string(size) + BASE);
@@ -46,6 +49,16 @@ void readInstance(string index, int size) {
     // }
 }
 
+void generateOutput(string index, int size) {
+    ofstream outFile(PATH + index + OUTPUT_PREFIX + index + "_" + to_string(size) + BASE);
+    outFile << 0 << endl;
+    outFile << 1;
+    for (int j = 2; j <= size; ++j) {
+        outFile << " " << j; 
+    }
+    outFile.close();
+}
+
 void readResult(string index, int size) {
     ifstream resultFile(PATH + index + OUTPUT_PREFIX + index + "_" + to_string(size) + BASE);
     int job;
@@ -54,7 +67,7 @@ void readResult(string index, int size) {
     resultFile.close();
 }
 
-int validateResult() {
+double validateResult() {
     int time = 0, criterion = 0;
     int end1stTime = 0, end2ndTime = 0, end3rdTime = 0;
     int sumWeights = 0;
@@ -74,33 +87,41 @@ int validateResult() {
         sumWeights += tasks[index - 1].weight;
         criterion += tasks[index - 1].weight * max(0, end3rdTime - tasks[index - 1].deadlineTime);
     }
-    return sumWeights * criterion / sumWeights;
+    return criterion / double(sumWeights);
 }
 
 void printSummary(int size, double criterion) {
     cout << "Instance: " << size << endl
-        << "Received criterion: " << result.criterion << endl
-        << "Calculated criterion: " << criterion << endl << endl; 
+         << "Received criterion: " << result.criterion << endl
+         << "Calculated criterion: " << round(criterion) << endl << endl; 
 }
 
 int main(int argc, char *argv[]) {
-    string index;
+    // string index;
 
-    if (argc < 2) {
-        cout << "Enter index: ";
-        cin >> index;
-    } else {
-        index = argv[1];
+    string indexes[] = {"136774", "136785", "136812", "136815", "132336", "136803", "132639", "136814", "136807", "136798", "132337", "132321", "136808", "136691"};
+    ofstream allResults("all.txt");
+
+    // if (argc < 2) {
+    //     cout << "Enter index: ";
+    //     cin >> index;
+    // } else {
+    //     index = argv[1];
+    // }
+
+    for (string index : indexes) {
+        allResults << endl << endl << index << endl;
+        for (int i = 50; i <= 500; i += 50) {
+            result.jobs.clear();
+            tasks.clear();
+            readInstance(index, i);
+            generateOutput(index, i);
+            readResult(index, i);
+            double criterion = validateResult();
+            allResults << round(criterion) << endl;
+            // printSummary(i, criterion);
+        }    
     }
-
-    for (int i = 50; i <= 500; i += 50) {
-        result.jobs.clear();
-        tasks.clear();
-        readInstance(index, i);
-        readResult(index, i);
-        int criterion = validateResult();
-        printSummary(i, criterion);
-    }    
-
+    allResults.close();
     return 0;
 }
