@@ -60,28 +60,21 @@ bool checkCriterion(int min, int j) {
     timeMin += tasks[min].processingDurations[0];
     timeJ += tasks[j].processingDurations[0];
     
-    if (machine.time2 > timeMin) {
-        gapMin += machine.time2 - timeMin;
-    }
-    if (machine.time2 > timeJ) {
-        gapJ += machine.time2 - timeJ;
-    };
+    if (machine.time2 > timeMin) gapMin += machine.time2 - timeMin;
+    if (machine.time2 > timeJ) gapJ += machine.time2 - timeJ;
 
     timeMin = machine.time2 + tasks[min].processingDurations[1];
     timeJ = machine.time2 + tasks[j].processingDurations[1];
 
-    if (machine.time3 > timeMin) {
-        gapMin += machine.time3 - timeMin;
-    }
-    if (machine.time3 > timeJ) {
-        gapJ += machine.time3 - timeJ;
-    }
+    if (machine.time3 > timeMin) gapMin += machine.time3 - timeMin;
+    if (machine.time3 > timeJ) gapJ += machine.time3 - timeJ;
+
     timeMin = machine.time3 + tasks[min].processingDurations[2];
     timeJ = machine.time3 + tasks[j].processingDurations[2];
     
-    return tasks[j].weight == tasks[min].weight
-        ? tasks[j].deadlineTime + gapJ < tasks[min].deadlineTime + gapMin
-        : tasks[j].weight > tasks[min].weight;
+    return (float)(tasks[j].deadlineTime + gapJ) / (float)tasks[j].weight
+                                            <
+        (float)(tasks[min].deadlineTime + gapMin) / (float)tasks[min].weight;
 }
 
 void sort() {  
@@ -102,11 +95,6 @@ void sort() {
 }
 
 void schedule() {
-    // sort(tasks.begin(), tasks.end(), [](const Task& lhs, const Task& rhs) {
-    //     return lhs.weight == rhs.weight
-    //         ? lhs.deadlineTime < rhs.deadlineTime
-    //         : lhs.weight > rhs.weight;
-    // });
     sort();
 }
 
@@ -120,7 +108,7 @@ void generateOutput(string index, int size, double criterion) {
     outFile.close();
 }
 
-double validateResult() { // dodac przerwy miedzy meetingami
+double validateResult() {
     int time = 0, criterion = 0;
     int end1stTime = 0, end2ndTime = 0, end3rdTime = 0;
     int sumWeights = 0;
