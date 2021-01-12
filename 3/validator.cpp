@@ -110,16 +110,17 @@ int main(int argc, char *argv[]) {
     // }
 
     for (string index : indexes) {
+        cout << index << endl << endl;
         allResults << endl << endl << index << endl;
         for (int i = 50; i <= 500; i += 50) {
             result.jobs.clear();
             tasks.clear();
             readInstance(index, i);
-            generateOutput(index, i);
+            // generateOutput(index, i);
             readResult(index, i);
             double criterion = validateResult();
             allResults << round(criterion) << endl;
-            // printSummary(i, criterion);
+            printSummary(i, criterion);
         }    
     }
     allResults.close();
